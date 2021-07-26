@@ -1,5 +1,5 @@
-import sys, os, time
-from prometheus_client import start_http_server, Summary, Gauge
+import time
+from prometheus_client import start_http_server, Gauge
 from pythonping import ping
 from multiprocessing import Process
 
