@@ -9,11 +9,11 @@ def ping_ip(name):
         os.remove(name+"output.txt")
     if "linux" in sys.platform.lower():
         print("Linux")
-        pingcmd = "ping " + name
+        pingcmd = "ping -t " + name + " > " + name+"output.txt"
     elif sys.platform == "win32":
         print("Windows")
         pingcmd = "ping -t " + name + " > " + name+"output.txt"
-        print(pingcmd)
+    print(pingcmd)
 
     os.system(pingcmd)
 
