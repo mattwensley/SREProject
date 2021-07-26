@@ -1,26 +1,22 @@
 import sys, os
-from subprocess import Popen, PIPE
+from prometheus_client import start_http_server, Summary0s
+from pythonping import ping
+from multiprocessing import Process
 
-ips = ["4.4.4.4", "8.8.8.8"]
+Responses = Summary('Responses','Number of total responses')
+ips = ["8.8.8.8","4.4.4.4"]
 
 def ping_ip(name):
-    #sys.stdout = open(name+"output.txt","w")
-    if os.path.exists(name+"output.txt"):
-        os.remove(name+"output.txt")
-    if "linux" in sys.platform.lower():
-        print("Linux")
-        pingcmd = "ping -t " + name + " > " + name+"output.txt"
-    elif sys.platform == "win32":
-        print("Windows")
-        pingcmd = "ping -t " + name + " > " + name+"output.txt"
-    print(pingcmd)
-
-    os.system(pingcmd)
-
+    print("Pinging", name)
+    ping(name, verbose=True)
 
 
 if __name__ == '__main__':
-    for i in range(len(ips)):
-        print("pinging:",ips[i])
-        ping_ip(ips[i])
+    start_http_server(8000)
+    four = Process(target=ping_ip, args=("4.4.4.4",))
+    eight = Process(target=ping_ip, args=("8.8.8.8",))
+    four.start()
+    eight.start()
+
+
 
