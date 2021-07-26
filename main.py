@@ -13,6 +13,7 @@ def ping_ip(name):
     elif sys.platform == "win32":
         print("Windows")
         pingcmd = "ping -t " + name + " > " + name+"output.txt"
+        print(pingcmd)
 
     os.system(pingcmd)
 
