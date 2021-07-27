@@ -34,6 +34,7 @@ def check_elasticsearch(product_id):
 
 
 def check_mysql(product_id):
+    print("Looking in mysql server")
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -43,7 +44,7 @@ def check_mysql(product_id):
 
     mycursor = mydb.cursor()
 
-    mycursor.execute("select * from products")
+    mycursor.execute("select * from products1")
 
     myresult = mycursor.fetchall()
 
