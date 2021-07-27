@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # lookup_item(product_id)
 
     # Test item in mysql
-    lookup_item(product_id)
+    lookup_item(sql_id)
 
     # Test item doesn't exist
     print("JSON for that product is: ", lookup_item(not_id))
