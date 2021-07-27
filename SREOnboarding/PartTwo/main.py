@@ -5,13 +5,15 @@ import mysql.connector
 def lookup_item(product_id):
     print("Looking up", product_id)
 
-    if check_cache(product_id):
-        return check_cache(product_id)
-    elif check_elasticsearch(product_id):
-        add_to_cache(product_id)
-        return check_elasticsearch(product_id)
-    elif check_mysql(product_id):
-        return check_mysql(product_id)
+    details = check_cache(product_id)
+    if details:
+        return details
+    details = check_elasticsearch(product_id)
+    if details:
+        return details
+    details = check_mysql(product_id)
+    if details:
+        return details
 
     return "Product does not exist"
 
@@ -110,6 +112,9 @@ if __name__ == '__main__':
     # lookup_item(elasticsearch_id)
 
     # Test item in mysql
+    print("JSON for that product is: ", lookup_item(sql_id))
+
+    # Test item has been added to cache
     print("JSON for that product is: ", lookup_item(sql_id))
 
     # Test item doesn't exist
