@@ -22,7 +22,7 @@ def ping_ip4():
         ms = str(obj).split()
         size = len(ms[6])
         try:
-            s.set(ms[30:34])
+            s.set(ms[6][:size-2])
             print("Response time(ms):",ms[6][:size-2])
             failed.set(0)
         except:
@@ -50,7 +50,7 @@ def ping_ip8():
         ms = str(obj).split()
         size = len(ms[6])
         try:
-            s.set(ms[30:34])
+            s.set(ms[6][:size-2])
             print("Response time(ms):",ms[6][:size-2])
             failed.set(0)
         except:

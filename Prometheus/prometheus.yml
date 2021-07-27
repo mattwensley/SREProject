@@ -8,7 +8,7 @@ remote_write:
 - url: https://prometheus-blocks-prod-us-central1.grafana.net/api/prom/push
   basic_auth:
     username: 169151
-    password: 
+    password: eyJrIjoiOTIxMmY5YjNlODMyMzNmMTBjM2VlZmZmMWZmYjFmYzM4MTk0M2M0NSIsIm4iOiJwcm9tZXRoZXVzIiwiaWQiOjUyNTE1OX0=
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
 rule_files:
@@ -27,13 +27,21 @@ scrape_configs:
     static_configs:
     - targets: ['localhost:9090']
 
+  - job_name: 'windows-exporter'
+    static_configs:
+      - targets: [ 'localhost:9182' ]
+
+  - job_name: 'pingdata'
+    static_configs:
+      - targets: [ 'localhost:8000' ]
+
   - job_name: 'ping4.4.4.4'
     static_configs:
-      - targets: [ 'pingnode:8001' ]
+      - targets: [ 'localhost:8001' ]
 
   - job_name: 'ping8.8.8.8'
     static_configs:
-      - targets: [ 'pingnode:8002' ]
+      - targets: [ 'localhost:8002' ]
 
 alerting:
   alertmanagers:
