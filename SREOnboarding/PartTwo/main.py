@@ -60,7 +60,7 @@ def preload():
     cache.close()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     product_id = "00001"
     not_id = "000x01"
 
