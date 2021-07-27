@@ -42,28 +42,29 @@ def check_mysql(product_id):
     )
 
     mycursor = mydb.cursor(dictionary=True)
-    print("select * from products1 where product = "+product_id)
+#    print("select * from products1 where product = "+product_id)
     mycursor.execute("select * from products1 where product = \""+product_id+"\"")
 
-    myresult = mycursor.fetchall()
 
-    if myresult:
+    try:
+        myresult = mycursor.fetchall()[0]
         print("Returning from sql",myresult)
         jsoned = json.dumps(myresult)
         add_to_cache(myresult)
         return jsoned
-    print(product_id, "not in mysql")
-    return
+    except:
+        print(product_id, "not in mysql")
+        return
 
 
 def add_to_cache(product_details):
     print("adding to the cache:",product_details)
     with open("localcache.json", 'r+') as file:
         file_data = json.load(file)
-        print("Productdetails[0]",product_details[0])
+#        print("Productdetails[0]",product_details[0])
         file_data["product"].append({
-            'productid': product_details[0].get("product"),
-            'name':product_details[0].get("name")
+            'productid': product_details.get("product"),
+            'name':product_details.get("name")
             })
 #        file_data["product"].append(product_details)
         file.seek(0)
