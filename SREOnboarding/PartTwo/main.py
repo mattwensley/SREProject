@@ -41,16 +41,17 @@ def check_mysql(product_id):
         database="products"
     )
 
-    mycursor = mydb.cursor()
-
-    mycursor.execute("select * from products1 where product = %s",product_id)
+    mycursor = mydb.cursor(dictionary=True)
+    print("select * from products1 where product = "+product_id)
+    mycursor.execute("select * from products1 where product = \""+product_id+"\"")
 
     myresult = mycursor.fetchall()
 
     if myresult:
-        print("Returning from sql")
-        add_to_cache(myresult)
-        return x[0]
+        print("Returning from sql",myresult)
+        jsoned = json.dumps(myresult)
+        add_to_cache(jsoned)
+        return jsoned
     print(product_id, "not in mysql")
     return
 
