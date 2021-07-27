@@ -1,4 +1,5 @@
 import json
+import mysql.connector
 
 
 def lookup_item(product_id):
@@ -33,7 +34,21 @@ def check_elasticsearch(product_id):
 
 
 def check_mysql(product_id):
-    pass
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="password",
+        database="products"
+    )
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("select * from products")
+
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        print(x)
 
 
 def add_to_cache(product_id):
@@ -60,7 +75,7 @@ def preload():
     cache.close()
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     product_id = "00001"
     not_id = "000x01"
 
