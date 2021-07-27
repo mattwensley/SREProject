@@ -32,8 +32,8 @@ def ping_ip8():
         obj = ping(name, verbose=True, count=1)
         ms = str(obj)
         try:
-            s.set(ms[30:35])
-            print("Response time(ms):",ms[30:35])
+            s.set(ms[30:34])
+            print("Response time(ms):",ms[30:34])
             failed.set(0)
         except:
             print("No reply from",name)
