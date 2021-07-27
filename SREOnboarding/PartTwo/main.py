@@ -49,8 +49,10 @@ def check_mysql(product_id):
     myresult = mycursor.fetchall()
 
     for x in myresult:
-        print(x)
-
+        if x[0]==product_id:
+            return x
+    print(product_id, "not in mysql")
+    return
 
 def add_to_cache(product_id):
     pass
