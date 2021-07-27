@@ -50,16 +50,30 @@ def check_mysql(product_id):
     if myresult:
         print("Returning from sql",myresult)
         jsoned = json.dumps(myresult)
-        add_to_cache(jsoned)
+        add_to_cache(myresult)
         return jsoned
     print(product_id, "not in mysql")
     return
 
 
-def add_to_cache(product_id):
-    pass
+def add_to_cache(product_details):
+    print("adding to the cache:",product_details)
+    with open("localcache.json", 'r+') as file:
+        file_data = json.load(file)
+        print("Productdetails[0]",product_details[0])
+        file_data["product"].append({
+            'productid': product_details[0].get("product"),
+            'name':product_details[0].get("name")
+            })
+#        file_data["product"].append(product_details)
+        file.seek(0)
+        json.dump(file_data, file, indent=4)
+        
+        
+        output = json.dumps(file_data)
 
-
+        print("added to the cache",output)
+        
 def preload():
     cache = open("localcache.json", "w")
     data = {'product': []}
@@ -95,7 +109,7 @@ if __name__ == '__main__':
     # lookup_item(elasticsearch_id)
 
     # Test item in mysql
-    lookup_item(sql_id)
+    print("JSON for that product is: ", lookup_item(sql_id))
 
     # Test item doesn't exist
     print("JSON for that product is: ", lookup_item(not_id))
