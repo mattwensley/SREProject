@@ -11,7 +11,6 @@ def lookup_item(product_id):
         add_to_cache(product_id)
         return check_elasticsearch(product_id)
     elif check_mysql(product_id):
-        add_to_cache(product_id)
         return check_mysql(product_id)
 
     return "Product does not exist"
@@ -44,15 +43,17 @@ def check_mysql(product_id):
 
     mycursor = mydb.cursor()
 
-    mycursor.execute("select * from products1")
+    mycursor.execute("select * from products1 where product = %s",product_id)
 
     myresult = mycursor.fetchall()
 
-    for x in myresult:
-        if x[0]==product_id:
-            return x
+    if myresult:
+        print("Returning from sql")
+        add_to_cache(myresult)
+        return x[0]
     print(product_id, "not in mysql")
     return
+
 
 def add_to_cache(product_id):
     pass
@@ -62,16 +63,16 @@ def preload():
     cache = open("localcache.json", "w")
     data = {'product': []}
     data['product'].append({
-        'name':'Apple',
-        'productid':"00001"
+        'name': 'Apple',
+        'productid': "00001"
     })
     data['product'].append({
-        'name':'Orange',
-        'productid':"00002"
+        'name': 'Orange',
+        'productid': "00002"
     })
     data['product'].append({
-        'name':'Banana',
-        'productid':"00003"
+        'name': 'Banana',
+        'productid': "00003"
     })
 
     json.dump(data, cache)
@@ -80,6 +81,7 @@ def preload():
 
 if __name__ == '__main__':
     cache_id = "00001"
+    elasticsearch_id = "00005"
     sql_id = "00004"
     not_id = "000x01"
 
@@ -88,9 +90,8 @@ if __name__ == '__main__':
     # Test item in cache
     print("JSON for that product is: ", lookup_item(cache_id))
 
-
     # Test item in Elasticsearch
-    # lookup_item(product_id)
+    # lookup_item(elasticsearch_id)
 
     # Test item in mysql
     lookup_item(sql_id)
