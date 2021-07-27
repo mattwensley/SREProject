@@ -77,20 +77,21 @@ def preload():
 
 
 if __name__ == '__main__':
-    product_id = "00001"
+    cache_id = "00001"
+    sql_id = "00004"
     not_id = "000x01"
 
     preload()
 
     # Test item in cache
-    print("JSON for that product is: ", lookup_item(product_id))
+    print("JSON for that product is: ", lookup_item(cache_id))
 
 
     # Test item in Elasticsearch
     # lookup_item(product_id)
 
     # Test item in mysql
-    # lookup_item(product_id)
+    lookup_item(product_id)
 
     # Test item doesn't exist
     print("JSON for that product is: ", lookup_item(not_id))
