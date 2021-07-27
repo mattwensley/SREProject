@@ -31,17 +31,13 @@ scrape_configs:
     static_configs:
       - targets: [ 'localhost:9182' ]
 
-  - job_name: 'pingdata'
-    static_configs:
-      - targets: [ 'localhost:8000' ]
-
   - job_name: 'ping4.4.4.4'
     static_configs:
-      - targets: [ 'localhost:8001' ]
+      - targets: [ 'pingnode:8001' ]
 
   - job_name: 'ping8.8.8.8'
     static_configs:
-      - targets: [ 'localhost:8002' ]
+      - targets: [ 'pingnode:8002' ]
 
 alerting:
   alertmanagers:
