@@ -34,7 +34,13 @@ def check_cache(product_id):
 
 def check_elasticsearch(product_id):
     print("Checking ElasticSearch")
-
+    es = Elasticsearch("localhost:9200",)
+    res = es.search(index="products",body={"query" :{"match": {"product":product_id}}})
+    if res['hits']['total']['value']>0:
+        result = res['hits']['hits'][0]['_source']
+        print("Returning from ElasticSearch: ",result)
+        add_to_cache(result)
+        return result
     print("Not in ElasticSearch")
     return
 
@@ -51,7 +57,6 @@ def check_mysql(product_id):
     mycursor = mydb.cursor(dictionary=True)
     sql = "select * from products1 where product = %s"
     mycursor.execute(sql, (product_id,))
-#    mycursor.execute("select * from products1 where product = \""+product_id+"\"")
 
 
     try:
@@ -140,7 +145,10 @@ if __name__ == '__main__':
     # Test item in mysql
     print("JSON for that product is: ", lookup_item(sql_id))
 
-    # Test item has been added to cache
+    # Test item found in Elasticsearch has been added to the cache
+    print("JSON for that product is: ",lookup_item(elasticsearch_id))
+
+    # Test item found in SQL has been added to cache
     print("JSON for that product is: ", lookup_item(sql_id))
 
     # Test item doesn't exist
