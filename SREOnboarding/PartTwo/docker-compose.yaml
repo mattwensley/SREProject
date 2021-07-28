@@ -28,3 +28,16 @@ services:
                         - 5601:5601
                 depends_on:
                         - elasticsearch
+        logstash:
+                build:
+                        context: .
+                        dockerfile: Dockerfile-logstash
+                container_name: sem_logstash
+                depends_on:
+                        - sqlsearch
+                        - elasticsearch
+                volumes:
+                        - ./volumes/logstash/pipeline/:/usr/share/logstash/pipeline/
+                        - ./volumes/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+                        - ./volumes/logstash/config/queries/:/usr/share/logstash/config/queries/
+
