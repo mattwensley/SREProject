@@ -19,6 +19,8 @@ services:
                           options:
                                 max-size: "10k"
                                 max-file: "10"
+                ports:
+                        - 9200:9200
         kibana:
                 image: docker.elastic.co/kibana/kibana:7.9.3
                 container_name: sem_kibana
