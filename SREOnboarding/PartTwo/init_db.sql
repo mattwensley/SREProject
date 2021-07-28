@@ -2,7 +2,7 @@ ALTER USER 'root' IDENTIFIED WITH mysql_native_password BY 'password';
 create database products;
 use products;
 create table products1 (
- product varchar(255),
+ productid varchar(255),
  name varchar(255)
  );
 

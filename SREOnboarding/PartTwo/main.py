@@ -35,13 +35,13 @@ def check_cache(product_id):
 def check_elasticsearch(product_id):
     print("Checking ElasticSearch")
     es = Elasticsearch("localhost:9200",)
-    res = es.search(index="products",body={"query" :{"match": {"product":product_id}}})
+    res = es.search(index="products",body={"query" :{"match": {"productid":product_id}}})
     if res['hits']['total']['value']>0:
         result = res['hits']['hits'][0]['_source']
         print("Returning from ElasticSearch: ",result)
         add_to_cache(result)
         return result
-    print("Not in ElasticSearch")
+    print(product_id, "not in ElasticSearch")
     return
 
 
@@ -55,7 +55,7 @@ def check_mysql(product_id):
     )
 
     mycursor = mydb.cursor(dictionary=True)
-    sql = "select * from products1 where product = %s"
+    sql = "select * from products1 where productid = %s"
     mycursor.execute(sql, (product_id,))
 
 
@@ -75,7 +75,7 @@ def add_to_cache(product_details):
     with open("localcache.json", 'r+') as file:
         file_data = json.load(file)
         file_data["product"].append({
-            'productid': product_details.get("product"),
+            'productid': product_details.get("productid"),
             'name':product_details.get("name")
             })
         file.seek(0)
@@ -112,7 +112,7 @@ def preload():
       database="products"
     )
     mycursor = mydb.cursor()
-    mycursor.execute("insert into products1 (product, name) values ('00006', 'Coconut')")
+    mycursor.execute("insert into products1 (productid, name) values ('00006', 'Coconut')")
     mydb.commit()
 
 
@@ -124,7 +124,7 @@ def reset():
       database="products"
     )
     mycursor = mydb.cursor()
-    mycursor.execute("delete from products1 where product = '00006'")
+    mycursor.execute("delete from products1 where productid = '00006'")
     mydb.commit()
     mycursor.close()
 
