@@ -1,9 +1,10 @@
 import json
 import mysql.connector
+from elasticsearch import Elasticsearch, helpers
 
 
 def lookup_item(product_id):
-    print("Looking up", product_id)
+    print("====== Looking up", product_id,"======")
 
     details = check_cache(product_id)
     if details:
@@ -19,6 +20,7 @@ def lookup_item(product_id):
 
 
 def check_cache(product_id):
+    print("Checking cache")
     with open("localcache.json") as cache:
         data = json.load(cache)
         for p in data["product"]:
@@ -31,7 +33,10 @@ def check_cache(product_id):
 
 
 def check_elasticsearch(product_id):
-    pass
+    print("Checking ElasticSearch")
+
+    print("Not in ElasticSearch")
+    return
 
 
 def check_mysql(product_id):
