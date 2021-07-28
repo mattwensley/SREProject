@@ -1,6 +1,6 @@
 import json
 import mysql.connector
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch
 
 
 def lookup_item(product_id):
@@ -49,8 +49,9 @@ def check_mysql(product_id):
     )
 
     mycursor = mydb.cursor(dictionary=True)
-#    print("select * from products1 where product = "+product_id)
-    mycursor.execute("select * from products1 where product = \""+product_id+"\"")
+    sql = "select * from products1 where product = %s"
+    mycursor.execute(sql, (product_id,))
+#    mycursor.execute("select * from products1 where product = \""+product_id+"\"")
 
 
     try:
@@ -68,12 +69,10 @@ def add_to_cache(product_details):
     print("adding to the cache:",product_details)
     with open("localcache.json", 'r+') as file:
         file_data = json.load(file)
-#        print("Productdetails[0]",product_details[0])
         file_data["product"].append({
             'productid': product_details.get("product"),
             'name':product_details.get("name")
             })
-#        file_data["product"].append(product_details)
         file.seek(0)
         json.dump(file_data, file, indent=4)
         
@@ -100,12 +99,34 @@ def preload():
 
     json.dump(data, cache)
     cache.close()
+    
+    mydb = mysql.connector.connect(
+      host="localhost",
+      user="root",
+      password="password",
+      database="products"
+    )
+    mycursor = mydb.cursor()
+    mycursor.execute("insert into products1 (product, name) values ('00006', 'Coconut')")
+    mydb.commit()
 
+
+def reset():
+    mydb = mysql.connector.connect(
+      host="localhost",
+      user="root",
+      password="password",
+      database="products"
+    )
+    mycursor = mydb.cursor()
+    mycursor.execute("delete from products1 where product = '00006'")
+    mydb.commit()
+    mycursor.close()
 
 if __name__ == '__main__':
     cache_id = "00001"
     elasticsearch_id = "00005"
-    sql_id = "00004"
+    sql_id = "00006"
     not_id = "000x01"
 
     preload()
@@ -114,7 +135,7 @@ if __name__ == '__main__':
     print("JSON for that product is: ", lookup_item(cache_id))
 
     # Test item in Elasticsearch
-    # lookup_item(elasticsearch_id)
+    print("JSON for that product is: ",lookup_item(elasticsearch_id))
 
     # Test item in mysql
     print("JSON for that product is: ", lookup_item(sql_id))
@@ -124,3 +145,5 @@ if __name__ == '__main__':
 
     # Test item doesn't exist
     print("JSON for that product is: ", lookup_item(not_id))
+
+    reset()
