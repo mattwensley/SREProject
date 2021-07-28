@@ -1,10 +1,14 @@
 import json
+import os
 import mysql.connector
 from elasticsearch import Elasticsearch
+import fileinput
 
 
 def lookup_item(product_id):
     print("====== Looking up", product_id,"======")
+
+    interest(product_id)
 
     details = check_cache(product_id)
     if details:
@@ -15,9 +19,35 @@ def lookup_item(product_id):
     details = check_mysql(product_id)
     if details:
         return details
+    
 
     return "Product does not exist"
 
+def interest(product_id):
+    print("Registering interest in",product_id)
+    
+    tmp = open("tmp.txt",'a')
+    register = 1
+    with open("interest.dict",'r') as file:
+        for line in file:
+            if product_id in line:
+                print("In file, increasing counter")
+                value = line.split()
+                value[1] = int(value[1])+1
+                tmp.write(product_id+" "+str(value[1])+'\n')
+                register = 0
+            elif line:
+                tmp.write(line)
+    
+    os.remove("interest.dict")
+    os.rename("tmp.txt","interest.dict")
+
+    if register:
+        print("Not in file, adding counter")
+        file = open("interest.dict","a")
+        file.write(product_id+ " 1"+'\n')
+        file.close()
+    
 
 def check_cache(product_id):
     print("Checking cache")
@@ -87,6 +117,12 @@ def add_to_cache(product_details):
         print("added to the cache",output)
         
 def preload():
+    
+    try:    
+        open("interest.dict", "x")
+    except:
+        pass    
+    
     cache = open("localcache.json", "w")
     data = {'product': []}
     data['product'].append({
