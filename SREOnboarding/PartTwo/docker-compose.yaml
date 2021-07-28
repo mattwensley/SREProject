@@ -2,6 +2,7 @@ version: "3"
 services:
         sqlsearch:
                 build: .
+                container_name: sem_sqlsearch
                 ports:
                         - 3306:3306
         elasticsearch:
