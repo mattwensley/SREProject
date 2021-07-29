@@ -8,8 +8,10 @@ from datetime import datetime
 def lookup_item(product_id):
     print("====== Looking up", product_id, "======")
 
+    # Log a search for that product_id. Includes products that aren't found in cache/elasticsearch/mysql
     product_request(product_id)
 
+    # Iterates through each level of storage and breaks out if the data is present
     details = check_cache(product_id)
     if details:
         return details
@@ -26,6 +28,7 @@ def lookup_item(product_id):
 def product_request(product_id):
     print(datetime.now(), "Registering request for", product_id)
 
+    # Look through the request file for the product id. Increment the following number by one and write to a tmp file
     tmp = open("tmp.txt", 'a')
     register = 1
     with open("product_request.txt", 'r') as file:
@@ -38,9 +41,11 @@ def product_request(product_id):
             elif line:
                 tmp.write(line)
 
+    # Replace the original file with the tmp file
     os.remove("product_request.txt")
     os.rename("tmp.txt", "product_request.txt")
 
+    # If the product wasn't found in the file, append it and add '1'
     if register:
         file = open("product_request.txt", "a")
         file.write(product_id + " 1" + '\n')
@@ -49,6 +54,8 @@ def product_request(product_id):
 
 def check_cache(product_id):
     print(datetime.now(), "Checking cache")
+
+    # Iterate through every element in the cache and return that json element if present
     with open("localcache.json") as cache:
         data = json.load(cache)
         for p in data["product"]:
@@ -62,19 +69,29 @@ def check_cache(product_id):
 
 def check_elasticsearch(product_id):
     print(datetime.now(), "Checking ElasticSearch")
+
+    # Build a query against the Elasticsearch instance and return it. Add the details to the cache file
     es = Elasticsearch("localhost:9200", )
-    res = es.search(index="products", body={"query": {"match": {"productid": product_id}}})
-    if res['hits']['total']['value'] > 0:
-        result = res['hits']['hits'][0]['_source']
-        print(datetime.now(), "  Returning from ElasticSearch: ", result)
-        add_to_cache(result)
-        return result
-    print(datetime.now(), "  Not in ElasticSearch")
-    return
+    try:
+        res = es.search(index="products", body={"query": {"match": {"productid": product_id}}})
+        if res['hits']['total']['value'] > 0:
+            result = res['hits']['hits'][0]['_source']
+            print(datetime.now(), "  Returning from ElasticSearch: ", result)
+            add_to_cache(result)
+            return result
+        print(datetime.now(), "  Not in ElasticSearch")
+        return
+
+    # Handle errors if the instance is down and move on to the mysql server
+    except:
+        print(datetime.now(), "  ElasticSearch is unavailable right now")
 
 
 def check_mysql(product_id):
     print(datetime.now(), "Checking mysql server")
+
+    # Connect to the mysql server instance
+    # TODO - safer credentials, not using root
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -82,6 +99,7 @@ def check_mysql(product_id):
         database="products"
     )
 
+    # Run a basic select query and return results as a dictionary. Add results to the cache file
     mycursor = mydb.cursor(dictionary=True)
     sql = "select * from products1 where productid = %s"
     mycursor.execute(sql, (product_id,))
@@ -93,12 +111,14 @@ def check_mysql(product_id):
         add_to_cache(myresult)
         return jsoned
     except:
-        print(datetime.now(), "  not in mysql")
+        print(datetime.now(), "  Not in mysql")
         return
 
 
 def add_to_cache(product_details):
     print(datetime.now(), "Adding to the cache")
+
+    # Load the existing json cache and add the details found in ElasticSearch/mysql
     with open("localcache.json", 'r+') as file:
         file_data = json.load(file)
         file_data["product"].append({
@@ -110,11 +130,13 @@ def add_to_cache(product_details):
 
 
 def initialise():
+    #Create the product_request.txt file if it doesn't exist already
     try:
         open("product_request.txt", "x")
     except:
         pass
 
+    # Create the cache, overwriting any existing files so any elements added in previous runs are cleared
     cache = open("localcache.json", "w")
     data = {'product': []}
     data['product'].append({
@@ -129,10 +151,10 @@ def initialise():
         'name': 'Banana',
         'productid': "00003"
     })
-
     json.dump(data, cache)
     cache.close()
 
+    # Add an entry to the mysql table so there is an item that is not in elasticsearch
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -145,6 +167,7 @@ def initialise():
 
 
 def reset():
+    # Remove the additional entry from the table
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
@@ -163,24 +186,26 @@ if __name__ == '__main__':
     sql_id = "00006"
     not_id = "000x01"
 
+    # Set up the environment
     initialise()
 
-    # Test item in cache
+    # Test to see if an item is in the cache file
     print(datetime.now(), "JSON for that product is: ", lookup_item(cache_id))
 
-    # Test item in Elasticsearch
+    # Test to see if an item is in Elasticsearch
     print(datetime.now(), "JSON for that product is: ", lookup_item(elasticsearch_id))
 
-    # Test item in mysql
+    # Test to see if an item is in mysql
     print(datetime.now(), "JSON for that product is: ", lookup_item(sql_id))
 
-    # Test item found in Elasticsearch has been added to the cache
+    # Test to see if the item previously found in Elasticsearch has been added to the cache
     print(datetime.now(), "JSON for that product is: ", lookup_item(elasticsearch_id))
 
-    # Test item found in SQL has been added to cache
+    # Test to see if the item previously found in SQL has been added to cache
     print(datetime.now(), "JSON for that product is: ", lookup_item(sql_id))
 
-    # Test item doesn't exist
+    # Test to see if an item doesn't exist
     print(datetime.now(), "JSON for that product is: ", lookup_item(not_id))
 
+    # Cleardown the environment
     reset()
