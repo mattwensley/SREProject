@@ -3,51 +3,28 @@ from prometheus_client import start_http_server, Gauge
 from pythonping import ping
 from multiprocessing import Process
 
-
-def ping_ip4():
-    s = Gauge('current_response_time', 'Response time in ms for 4.4.4.4')
-    failed = Gauge('check_request_failed', 'Has a request failed for 4.4.4.4')
-    start_http_server(8001)
-    name = "4.4.4.4"
-    print("Pinging", name)
+def ping_ip(port, ip):
+    s = Gauge(f'current_response_time', 'Response time in ms for {ip}')
+    failed = Gauge(f'check_request_failed', 'Has a request failed for {ip}')
+    start_http_server(port)
+    print('Pinging ', ip)
     while True:
-        obj = ping(name, verbose=True, count=1)
+        obj = ping(ip, verbose=True, count=1)
         ms = str(obj)
+        size = len(ms[6])
         try:
-            s.set(ms[30:35])
-            print("Response time(ms):",ms[30:35])
+            s.set(ms[6][:size-2])
+            print("Response time from [{ip}] (ms):",ms[6][:size-2])
             failed.set(0)
-        except:
-            print("No reply from",name)
+        except Exception as e:
+            print("Error from {ip}: ",e)
             failed.set(1)
-        time.sleep(3)
-
-def ping_ip8():
-    s = Gauge('current_response_time', 'Response time in ms for 8.8.8.8')
-    failed = Gauge('check_request_failed', 'Has a request failed for 8.8.8.8')
-    start_http_server(8002)
-    name = "8.8.8.8"
-    print("Pinging", name)
-    while True:
-        obj = ping(name, verbose=True, count=1)
-        ms = str(obj)
-        try:
-            s.set(ms[30:34])
-            print("Response time(ms):",ms[30:34])
-            failed.set(0)
-        except:
-            print("No reply from",name)
-            failed.set(1)
-        time.sleep(3)
-
-
+        # Run every 15 seconds to be in line with scrape interval
+        time.sleep(15)
 
 if __name__ == '__main__':
-    #start_http_server(8000)
-    four = Process(target=ping_ip4)
-    eight = Process(target=ping_ip8)
+    # Start the pinging processes in parallel
+    four = Process(target=ping_ip, args=(8001,"4.4.4.4"))
+    eight = Process(target=ping_ip, args=(8002,"8.8.8.8"))
     four.start()
     eight.start()
-
-
-

@@ -1,1 +1,9 @@
-Password removed from Prometheus/prometheus.yml
+- Password removed from Prometheus/prometheus.yml for security reasons. This means that Prometheus won't send data to Grafana, so I've attached a screenshot as evidence
+- Seems to be an odd bug after running "docker-compose up" that I can't work out - the pingnode sometimes won't do anything, even though the container is up. It works if you stop the container that compose creates and start it manually though, even from the same image that the compose builds. Command below:
+	docker run --net sreproject_default --name "pingnode" -it -d sreproject_pingnode
+Add "-p 8001:8001 -p 8002:8002" if you want to examine the webserver output that Prometheus scrapes
+
+TODO:
+- Duplicated code in main.py between the two methods should be broken out into a function(s). I tried doing this originally but the webserver that Prometheus would scrape wouldn't update, or would update incorrectly - I suspect due to the infinite while loop.
+- Update main.py to accept ip/webaddresses/hostnames as input, rather than the two servers hardcoded right now.
+- Add a container for and validate the configuration in alertmanager.yml
